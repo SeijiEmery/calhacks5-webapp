@@ -10,7 +10,7 @@ class CameraPage extends Component {
     return (
       <div className="App">
         <Camera 
-            onTakePhoto={(dataUri) => { this.props.onSubmit(dataUri); }}
+            onTakePhoto={(dataUri) => { this.props.onImageSubmit(dataUri); }}
         />
       </div>
     );
