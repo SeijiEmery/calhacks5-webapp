@@ -6,7 +6,11 @@ import LoadingPage from './components/LoadingPage';
 import ResultsPage from './components/ResultsPage';
 import 'whatwg-fetch';
 import CloudinaryUploader from './components/CloudinaryUploader';
+import GeolocationDataView from './components/GeolocationData';
+import maybeGetLocation from './util/GetLocation';
 // import { getSecret } from './secrets';
+
+require('dotenv').config()
 
 // const CLOUD_NAME = getSecret("CLOUDIFY_BUCKET_NAME");
 const CLOUDIFY_BUCKET_URL = "https://api.cloudinary.com/v1_1/dcflyhc8y/upload";
@@ -109,6 +113,8 @@ class App extends Component {
             message={this.state.message}
             onConfirm={() => this.confirmAndSubmitResults()}
             onCancel={() => this.returnToFirstPage()} />
+          <GeolocationDataView
+            geolocation={maybeGetLocation()} />
         </div>
       );
       case "error-posting": return (
