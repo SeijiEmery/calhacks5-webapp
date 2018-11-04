@@ -5,7 +5,13 @@ import LoadingPage from './components/LoadingPage';
 // import CameraVideoCapturePage from './components/CameraVideoCapturePage';
 import ResultsPage from './components/ResultsPage';
 import 'whatwg-fetch';
+import CloudinaryUploader from './components/CloudinaryUploader';
+// import { getSecret } from './secrets';
 
+// const CLOUD_NAME = getSecret("CLOUDIFY_BUCKET_NAME");
+const CLOUDIFY_BUCKET_URL = "https://api.cloudinary.com/v1_1/dcflyhc8y/upload";
+const CLOUDIFY_UPLOAD_PRESET = "ern5p9sg";
+// const CLOUDIFY_BUCKET_URL = `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/upload`;
 
 class App extends Component {
   constructor (props) {
@@ -13,10 +19,14 @@ class App extends Component {
     this.state = {
       activePage: "camera",
       captureVideo: false,
-      message: null
+      message: null,
+      imgdata: null
     };
     this.onImageSubmit = this.onImageSubmit.bind(this);
     this.enableVideo = this.enableVideo.bind(this);
+    this.onImageUploadFinished = this.onImageUploadFinished.bind(this);
+    this.onImageUploadFailed = this.onImageUploadFailed.bind(this);
+    this.returnToFirstPage = this.returnToFirstPage.bind(this);
   }
   returnToFirstPage () { this.setState({ activePage: "camera" }) }
   setLoading() { this.setState({ activePage: "loading" }); }
@@ -24,23 +34,42 @@ class App extends Component {
   enableVideo (event) { this.setState({ captureVideo: event.target.checked }); }
 
   onImageSubmit (dataUri) {
-    // Change page (loading page...)
-    this.setLoading();
-    // Upload image to a server and get URL
-    // Then submit to API, get response, and redirect to next page
-    fetch('/api/images', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ data: "hello world!" })
-    }).then(res => res.json()).then((res) => {
-      if (!res.success) this.setError("Error posting image: ", res.error.message || res.error);
-      else this.handleResults(res);
+    this.setState({
+      activePage: "loading",
+      imgdata: dataUri.data
     });
+    // uploadFile(dataUri.data);
+    // dataUri.data
+    // Change page (loading page...)
+    // this.setLoading();
+    // // Upload image to a server and get URL
+    // // Then submit to API, get response, and redirect to next page
+    // fetch('/api/images', {
+    //   method: 'POST',
+    //   headers: { 'Content-Type': 'application/json' },
+    //   body: JSON.stringify({ data: "hello world!" })
+    // }).then(res => res.json()).then((res) => {
+    //   if (!res.success) this.setError("Error posting image: ", res.error.message || res.error);
+    //   else this.handleResults(res);
+    // });
   }
   onVideoSubmit (stream) {  // note: this probably won't work - this react Camera component wasn't designed for video...
     this.setLoading();
     window.alert(""+stream);
     this.handleResults({ message: "bar" });
+  }
+  onImageUploadFinished (result) {
+    fetch('/api/images', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ data: result.url })
+    }).then(res => res.json()).then((res) => {
+      if (!res.success) this.setError("Error posting image: ", res.error.message || res.error);
+      else this.handleResults(res);
+    });
+  }
+  onImageUploadFailed (errorStatus) {
+    this.setError(`Failed to upload image to '${CLOUDIFY_BUCKET_URL}'`, errorStatus);
   }
   handleResults (result) {
     this.setState({
@@ -71,15 +100,24 @@ class App extends Component {
         onCancel={() => this.returnToFirstPage()} />
       case "error-posting": return (
         <div>
-          <h1>Error posting image:</h1>
-          <h3>{this.state.message}</h3>
+          <h1>{this.state.message}</h1>
           <button onClick={this.returnToFirstPage}>Ok</button>
         </div>
       );
       case "ask-for-permission": return (
         <p>Requesting permission...</p>
       );
-      case "loading": return <LoadingPage />;
+      case "loading": 
+        return (
+          <CloudinaryUploader
+            url={CLOUDIFY_BUCKET_URL}
+            data={this.state.data}
+            uploadPreset={CLOUDIFY_UPLOAD_PRESET}
+            onUploaded={this.onImageUploadFinished}
+            onError={this.onImageUploadFailed} 
+          />
+        );
+      case "loading-": return <LoadingPage />;
       default: return <h2>Invalid page: {this.state.activePage}</h2>
     }
   }
