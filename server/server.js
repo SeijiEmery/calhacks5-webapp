@@ -45,7 +45,7 @@ router.post('/images', (req, res) => {
     content.data = data;
     content.save(err => {
         if (err) return res.json({ success: false, error: err });
-        return res.json({ success: true });
+        return res.json({ success: true, message: "foo bar blarg" });
     });
 });
 

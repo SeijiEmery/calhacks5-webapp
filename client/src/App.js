@@ -4,6 +4,8 @@ import CameraPhotoCapturePage from './components/CameraPhotoCapturePage';
 import LoadingPage from './components/LoadingPage';
 // import CameraVideoCapturePage from './components/CameraVideoCapturePage';
 import ResultsPage from './components/ResultsPage';
+import 'whatwg-fetch';
+
 
 class App extends Component {
   constructor (props) {
@@ -18,6 +20,7 @@ class App extends Component {
   }
   returnToFirstPage () { this.setState({ activePage: "camera" }) }
   setLoading() { this.setState({ activePage: "loading" }); }
+  setError (msg, err) { this.setState({ activePage: "error-posting", message: ""+ msg + ": " + err }); }
   enableVideo (event) { this.setState({ captureVideo: event.target.checked }); }
 
   onImageSubmit (dataUri) {
@@ -25,8 +28,14 @@ class App extends Component {
     this.setLoading();
     // Upload image to a server and get URL
     // Then submit to API, get response, and redirect to next page
-    window.alert(""+dataUri);
-    this.handleResults({ message: "foo" });
+    fetch('/api/images', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ data: "hello world!" })
+    }).then(res => res.json()).then((res) => {
+      if (!res.success) this.setError("Error posting image: ", res.error.message || res.error);
+      else this.handleResults(res);
+    });
   }
   onVideoSubmit (stream) {  // note: this probably won't work - this react Camera component wasn't designed for video...
     this.setLoading();
@@ -60,7 +69,13 @@ class App extends Component {
         message={this.state.message}
         onConfirm={() => this.confirmAndSubmitResults()}
         onCancel={() => this.returnToFirstPage()} />
-
+      case "error-posting": return (
+        <div>
+          <h1>Error posting image:</h1>
+          <h3>{this.state.message}</h3>
+          <button onClick={this.returnToFirstPage}>Ok</button>
+        </div>
+      );
       case "ask-for-permission": return (
         <p>Requesting permission...</p>
       );
