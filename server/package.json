@@ -1,0 +1,23 @@
+{
+  "name": "calhacks5-test-server",
+  "version": "1.0.0",
+  "description": "An express test / demo server for a calhacks 5 hack",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/seijiemery/calhacks5-webapp.git"
+  },
+  "author": "Seiji Emery",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/seijiemery/calhacks5-webapp/issues"
+  },
+  "homepage": "https://github.com/seijiemery/calhacks5-webapp#readme",
+  "dependencies": {
+    "express": "^4.16.4"
+  }
+}
