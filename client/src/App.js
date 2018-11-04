@@ -53,6 +53,11 @@ class App extends Component {
     this.onImageUploadFinished = this.onImageUploadFinished.bind(this);
     this.onImageUploadFailed = this.onImageUploadFailed.bind(this);
     this.returnToFirstPage = this.returnToFirstPage.bind(this);
+
+    // Display sample page (w/ normal flow afterwards)
+    this.onImageUploadFinished({
+      src: 'https://www.californialegalteam.com/wp-content/uploads/2014/12/Sexual-harassment-lawyers.jpg'
+    })
   }
   returnToFirstPage () { this.setState({ activePage: "camera" }) }
   setLoading() { this.setState({ activePage: "loading" }); }
@@ -86,6 +91,7 @@ class App extends Component {
     this.handleResults({ message: "bar" });
   }
   onImageUploadFinished (result) {
+    this.setState({ activePage: 'loading' });
     let url = result.src.split("w_150,c_scale/").join("");
     fetch('https://api.clarifai.com/v2/models/harassdetect/outputs', {
       method: 'POST',
@@ -104,9 +110,8 @@ class App extends Component {
         }]
       })
     }).then(res => res.json()).then((res) => {
-      window.alert(JSON.stringify(res));
       if (res.status.code == 10000 && res.status.description === "Ok" && res.outputs) {
-        this.handleResults(res.outputs);
+        this.handleResults(res.outputs[0]);
       } else {
         window.alert(JSON.stringify(res));
         this.setError(JSON.stringify(res.status));
@@ -119,11 +124,10 @@ class App extends Component {
   handleResults (result) {
     this.setState({
       activePage: "display-results",
-      message: result.message,
+      result: result
     });
   }
   confirmAndSubmitResults () {
-    window.alert("submitting results!");
     this.returnToFirstPage();
   }
   renderPage () {
@@ -141,13 +145,12 @@ class App extends Component {
       }
       case "display-results": return (
         <div>
-          <img src={this.state.src} alt={"Could not load '"+this.state.src+"'"} />
           <ResultsPage
-            message={this.state.message}
+            result={this.state.result}
             onConfirm={() => this.confirmAndSubmitResults()}
             onCancel={() => this.returnToFirstPage()} />
-          <GeolocationDataView
-            geolocation={maybeGetLocation()} />
+          {/* <GeolocationDataView
+            geolocation={maybeGetLocation()} /> */}
         </div>
       );
       case "error-posting": return (

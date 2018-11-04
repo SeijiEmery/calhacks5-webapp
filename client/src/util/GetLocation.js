@@ -15,7 +15,7 @@ function maybeGetLocation () {
             }
         );
     }
-    window.alert(JSON.stringify(result));
+    // window.alert(JSON.stringify(result));
     return result;
 }
 export default maybeGetLocation;
