@@ -1,9 +1,8 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
 import './App.css';
 import CameraPhotoCapturePage from './components/CameraPhotoCapturePage';
 import LoadingPage from './components/LoadingPage';
-import CameraVideoCapturePage from './components/CameraVideoCapturePage';
+// import CameraVideoCapturePage from './components/CameraVideoCapturePage';
 import ResultsPage from './components/ResultsPage';
 
 class App extends Component {
