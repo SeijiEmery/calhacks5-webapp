@@ -56,11 +56,12 @@ class ResultsPage extends Component {
         {/* </ul> */}
         {/* <h3>Harassment: {results["harassment"]}</h3>
         <h3>Safe: {results["safe"]}</h3> */}
-        <h1>Confirm?</h1>
-        <div class="h-span">
-            <button onClick={this.props.onConfirm}>confirm</button>
+        <button onClick={this.props.onConfirm}>go back</button>
+        {/* <h1>Confirm?</h1> */}
+        {/* <div class="h-span"> */}
+            {/* <button onClick={this.props.onConfirm}>confirm</button>
             <button onClick={this.props.onCancel}>cancel</button>
-        </div>
+        </div> */}
       </div>
     );
   }
