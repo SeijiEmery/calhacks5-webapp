@@ -64,16 +64,17 @@ class App extends Component {
       src: result.src.split("w_150,c_scale/").join(""),
       alt: result.alt 
     });
-    fetch('/api/images', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ imgurl: result.src })
-    }).then(res => res.json()).then((res) => {
-      // window.alert(JSON.stringify(res));
-      if (!res.success) this.setError("Error posting image: ", res.error.message || res.error);
-      else this.handleResults(res);
-      this.handleResults(res);
-    });
+    this.handleResults({ message: "foo bar baz" });
+    // fetch('/api/images', {
+    //   method: 'POST',
+    //   headers: { 'Content-Type': 'application/json' },
+    //   body: JSON.stringify({ imgurl: result.src })
+    // }).then(res => res.json()).then((res) => {
+    //   // window.alert(JSON.stringify(res));
+    //   if (!res.success) this.setError("Error posting image: ", res.error.message || res.error);
+    //   else this.handleResults(res);
+    //   this.handleResults(res);
+    // });
   }
   onImageUploadFailed (errorStatus) {
     this.setError(`Failed to upload image to '${CLOUDIFY_BUCKET_URL}'`, errorStatus);
@@ -82,7 +83,6 @@ class App extends Component {
     this.setState({
       activePage: "display-results",
       message: result.message,
-      imgurl: result.imgurl
     });
   }
   confirmAndSubmitResults () {
