@@ -34,9 +34,10 @@ class App extends Component {
   enableVideo (event) { this.setState({ captureVideo: event.target.checked }); }
 
   onImageSubmit (dataUri) {
+    console.log("Submitting "+dataUri);
     this.setState({
       activePage: "loading",
-      imgdata: dataUri.data
+      imgdata: dataUri
     });
     // uploadFile(dataUri.data);
     // dataUri.data
@@ -59,13 +60,19 @@ class App extends Component {
     this.handleResults({ message: "bar" });
   }
   onImageUploadFinished (result) {
+    this.setState({ 
+      src: result.src.split("w_150,c_scale/").join(""),
+      alt: result.alt 
+    });
     fetch('/api/images', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ data: result.url })
+      body: JSON.stringify({ imgurl: result.src })
     }).then(res => res.json()).then((res) => {
+      // window.alert(JSON.stringify(res));
       if (!res.success) this.setError("Error posting image: ", res.error.message || res.error);
       else this.handleResults(res);
+      this.handleResults(res);
     });
   }
   onImageUploadFailed (errorStatus) {
@@ -74,7 +81,8 @@ class App extends Component {
   handleResults (result) {
     this.setState({
       activePage: "display-results",
-      message: result.message 
+      message: result.message,
+      imgurl: result.imgurl
     });
   }
   confirmAndSubmitResults () {
@@ -94,10 +102,15 @@ class App extends Component {
           </div>
         );
       }
-      case "display-results": return <ResultsPage
-        message={this.state.message}
-        onConfirm={() => this.confirmAndSubmitResults()}
-        onCancel={() => this.returnToFirstPage()} />
+      case "display-results": return (
+        <div>
+          <img src={this.state.src} alt={"Could not load '"+this.state.src+"'"} />
+          <ResultsPage
+            message={this.state.message}
+            onConfirm={() => this.confirmAndSubmitResults()}
+            onCancel={() => this.returnToFirstPage()} />
+        </div>
+      );
       case "error-posting": return (
         <div>
           <h1>{this.state.message}</h1>
@@ -111,7 +124,7 @@ class App extends Component {
         return (
           <CloudinaryUploader
             url={CLOUDIFY_BUCKET_URL}
-            data={this.state.data}
+            data={this.state.imgdata}
             uploadPreset={CLOUDIFY_UPLOAD_PRESET}
             onUploaded={this.onImageUploadFinished}
             onError={this.onImageUploadFailed} 

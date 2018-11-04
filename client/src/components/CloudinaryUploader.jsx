@@ -2,6 +2,25 @@ import React, { Component } from 'react';
 
 // Adapted from https://codepen.io/team/Cloudinary/pen/QgpyOK?editors=0010
 
+// https://stackoverflow.com/a/7261048
+function dataURItoBlob(dataURI) {
+  // convert base64 to raw binary data held in a string
+  // doesn't handle URLEncoded DataURIs - see SO answer #6850276 for code that does this
+  var byteString = atob(dataURI.split(',')[1]);
+
+  // separate out the mime component
+  var mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
+
+  // write the bytes of the string to an ArrayBuffer
+  var ab = new ArrayBuffer(byteString.length);
+  var ia = new Uint8Array(ab);
+  for (var i = 0; i < byteString.length; i++) {
+    ia[i] = byteString.charCodeAt(i);
+  }
+  return new Blob([ab], {type: mimeString});
+}
+
+
 class CloudinaryUploader extends Component {
   constructor (props) {
     super(props);
@@ -26,14 +45,14 @@ class CloudinaryUploader extends Component {
         let alt = response.public_id;
         props.onUploaded({ src: src, alt: alt });
       } else if (xhr.readyState === 4 && xhr.status !== 200) {
-        props.onError(xhr.status);
+        props.onError(""+xhr.readyState + ", " + xhr.status + " => ");
       }
     });
     xhr.upload.addEventListener("progress", onProgressUpdate);
     xhr.onreadystatechange = onReadyStateChange;
     fd.append('upload_preset', props.uploadPreset);
     fd.append('tags', 'browser_upload'); // Optional - add tag for image admin in Cloudinary
-    fd.append('file', props.data);
+    fd.append('file', dataURItoBlob(props.data));
     xhr.send(fd);
   }
   render () {

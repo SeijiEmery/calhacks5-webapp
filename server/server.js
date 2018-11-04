@@ -35,17 +35,18 @@ router.get('/images', (req, res) => {
 });
 router.post('/images', (req, res) => {
     const content = new ContentSubmission();
-    const { data } = req.body;
-    if (!data) {
+    const { imgurl } = req.body;
+    if (!imgurl) {
         return res.json({
             success: false,
-            error: "invalid input data"
+            error: "invalid input data",
+            body: req.body
         });
     }
-    content.data = data;
+    content.data = imgurl;
     content.save(err => {
         if (err) return res.json({ success: false, error: err });
-        return res.json({ success: true, message: "foo bar blarg" });
+        return res.json({ success: true, imgurl: imgurl, message: "foo bar blarg" });
     });
 });
 
