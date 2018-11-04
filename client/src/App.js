@@ -4,11 +4,12 @@ import CameraPhotoCapturePage from './components/CameraPhotoCapturePage';
 import LoadingPage from './components/LoadingPage';
 // import CameraVideoCapturePage from './components/CameraVideoCapturePage';
 import ResultsPage from './components/ResultsPage';
-import 'whatwg-fetch';
 import CloudinaryUploader from './components/CloudinaryUploader';
 import GeolocationDataView from './components/GeolocationData';
 import maybeGetLocation from './util/GetLocation';
 // import { getSecret } from './secrets';
+var request = require("request");
+
 
 require('dotenv').config()
 
@@ -16,6 +17,27 @@ require('dotenv').config()
 const CLOUDIFY_BUCKET_URL = "https://api.cloudinary.com/v1_1/dcflyhc8y/upload";
 const CLOUDIFY_UPLOAD_PRESET = "ern5p9sg";
 // const CLOUDIFY_BUCKET_URL = `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/upload`;
+
+// let url = 'https://www.californialegalteam.com/wp-content/uploads/2014/12/Sexual-harassment-lawyers.jpg';
+// fetch('https://api.clarifai.com/v2/models/harassdetect/outputs', {
+//       method: 'POST',
+//       cache: "no-cache",
+//       headers: { 
+//         'Content-Type': 'application/json',
+//         'Authorization': 'Key 213c2c3598bb49aab2af1e13147add47'
+//       },
+//       body: JSON.stringify({
+//         inputs: [{
+//           data: {
+//             image: {
+//               url: url
+//             }
+//           }
+//         }]
+//       })
+//     }).then(res => res.json()).then((res) => {
+//       window.alert(JSON.stringify(res));
+//     });
 
 class App extends Component {
   constructor (props) {
@@ -64,21 +86,32 @@ class App extends Component {
     this.handleResults({ message: "bar" });
   }
   onImageUploadFinished (result) {
-    this.setState({ 
-      src: result.src.split("w_150,c_scale/").join(""),
-      alt: result.alt 
+    let url = result.src.split("w_150,c_scale/").join("");
+    fetch('https://api.clarifai.com/v2/models/harassdetect/outputs', {
+      method: 'POST',
+      cache: "no-cache",
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': 'Key 213c2c3598bb49aab2af1e13147add47'
+      },
+      body: JSON.stringify({
+        inputs: [{
+          data: {
+            image: {
+              url: url
+            }
+          }
+        }]
+      })
+    }).then(res => res.json()).then((res) => {
+      window.alert(JSON.stringify(res));
+      if (res.status.code == 10000 && res.status.description === "Ok" && res.outputs) {
+        this.handleResults(res.outputs);
+      } else {
+        window.alert(JSON.stringify(res));
+        this.setError(JSON.stringify(res.status));
+      }
     });
-    this.handleResults({ message: "foo bar baz" });
-    // fetch('/api/images', {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify({ imgurl: result.src })
-    // }).then(res => res.json()).then((res) => {
-    //   // window.alert(JSON.stringify(res));
-    //   if (!res.success) this.setError("Error posting image: ", res.error.message || res.error);
-    //   else this.handleResults(res);
-    //   this.handleResults(res);
-    // });
   }
   onImageUploadFailed (errorStatus) {
     this.setError(`Failed to upload image to '${CLOUDIFY_BUCKET_URL}'`, errorStatus);
